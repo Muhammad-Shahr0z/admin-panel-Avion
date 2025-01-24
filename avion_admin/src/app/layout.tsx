@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import ConditionalSideBar from "./components/CondionalSideBar";
+import DataFetching from "@/DataFetching";
+
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -20,15 +23,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
+      <DataFetching/>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+       {children}
+       <ConditionalSideBar/>
       </body>
     </html>
   );
