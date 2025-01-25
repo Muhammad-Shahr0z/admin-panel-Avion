@@ -3,6 +3,13 @@
 @tailwind utilities;
 
 
+html,
+body {
+  height: 100%;
+}
+
+
+
 /* Global Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 10px; /* Width of the scrollbar */
