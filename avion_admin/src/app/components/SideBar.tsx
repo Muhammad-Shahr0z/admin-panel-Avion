@@ -71,7 +71,7 @@ const SideBar = () => {
           </Link>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 hover:bg-red-600 p-2 rounded text-red-500 mt-4 transition-all duration-300"
+            className="flex items-center gap-2 hover:bg-red-600 hover:text-white p-2 rounded text-red-500 mt-4 transition-all duration-300"
           >
             <FaSignOutAlt /> Logout
           </button>
