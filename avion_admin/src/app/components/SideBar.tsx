@@ -1,90 +1,149 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { FaBox, FaChartBar, FaList, FaUser, FaTimes, FaBars, FaSignOutAlt } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { 
+  FaBox, 
+  FaChartBar, 
+  FaUser, 
+  FaTimes, 
+  FaBars, 
+  FaSignOutAlt,
+  FaShoppingCart,
+  FaTachometerAlt
+} from "react-icons/fa";
+import { useRouter, usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SideBar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
     router.push("/");
   };
 
+  const navItems = [
+    { href: "/admin", icon: <FaTachometerAlt />, text: "Dashboard" },
+    { href: "/admin/product", icon: <FaBox />, text: "Products" },
+    { href: "/admin/customers", icon: <FaUser />, text: "Customers" },
+    { href: "/admin/orders", icon: <FaShoppingCart />, text: "Orders" },
+  ];
+
+  const sidebarVariants = {
+    open: { x: 0, transition: { type: "spring", stiffness: 300, damping: 30 } },
+    closed: { x: "-100%", transition: { type: "spring", stiffness: 300, damping: 30 } }
+  };
+
+  const itemVariants = {
+    open: { opacity: 1, x: 0 },
+    closed: { opacity: 0, x: -20 }
+  };
+
+  if (!isMounted) return null;
+
   return (
     <div className="z-50">
-      {/* Header when Sidebar is Closed */}
-      {!sidebarOpen && (
-        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-600 to-blue-700 text-white w-full fixed top-0 left-0 z-10 md:hidden">
-          <h1 className="text-xl font-bold">Avion Admin</h1>
+      {/* Mobile Header */}
+      {isMobile && !sidebarOpen && (
+        <motion.div
+          initial={{ y: -20 }}
+          animate={{ y: 0 }}
+          className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-600 to-indigo-700 text-white w-full fixed top-0 left-0 z-10 md:hidden shadow-lg"
+        >
+          <h1 className="text-xl font-bold tracking-tight">Avion Admin</h1>
           <button
             onClick={() => setSidebarOpen(true)}
-            className="text-white text-2xl"
+            className="text-white text-2xl hover:scale-110 transition-transform"
           >
             <FaBars />
           </button>
-        </div>
+        </motion.div>
       )}
 
       {/* Sidebar */}
-      <aside
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 transform fixed top-0 left-0 w-64 bg-gradient-to-r from-blue-800 to-blue-900 text-white h-full transition-transform duration-300 z-20`}
+      <motion.aside
+        variants={sidebarVariants}
+        initial="closed"
+        animate={isMobile ? (sidebarOpen ? "open" : "closed") : "open"}
+        className="fixed top-0 left-0 w-64 bg-gradient-to-br from-purple-800 to-indigo-900 text-white h-full z-20 shadow-2xl"
       >
-        <div className="flex justify-between items-center p-4 border-b border-blue-700">
-          <h1 className="text-xl font-bold">Avion</h1>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="text-white text-2xl md:hidden"
-          >
-            <FaTimes />
-          </button>
+        <div className="flex justify-between items-center p-4 border-b border-indigo-700">
+          <h1 className="text-xl font-bold tracking-tighter">Avion Dashboard</h1>
+          {isMobile && (
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="text-white text-2xl md:hidden hover:rotate-90 transition-transform"
+            >
+              <FaTimes />
+            </button>
+          )}
         </div>
-        <nav className="flex flex-col p-4 gap-4">
-          <Link
-            href="/admin"
-            className="flex items-center gap-2 hover:bg-indigo-700 p-2 rounded transition-all duration-300"
+        
+        <nav className="flex flex-col p-4 gap-2">
+          {navItems.map((item, index) => (
+            <motion.div
+              key={item.href}
+              variants={itemVariants}
+              transition={{ delay: index * 0.1 }}
+              className="hover-effect"
+            >
+              <Link
+                href={item.href}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-300 group
+                  ${pathname === item.href 
+                    ? "bg-gradient-to-r from-pink-500 to-purple-600 shadow-lg"
+                    : "hover:bg-indigo-700 hover:translate-x-2"}`}
+              >
+                <span className={`text-xl ${pathname === item.href ? "text-white" : "text-purple-300"} 
+                  group-hover:text-white group-hover:scale-110 transition-transform`}>
+                  {item.icon}
+                </span>
+                <span className="font-medium">{item.text}</span>
+              </Link>
+            </motion.div>
+          ))}
+          
+          <motion.div
+            variants={itemVariants}
+            transition={{ delay: navItems.length * 0.1 }}
+            className="mt-4"
           >
-            <FaChartBar /> Dashboard
-          </Link>
-          <Link
-            href="/admin/product"
-            className="flex items-center gap-2 hover:bg-indigo-700 p-2 rounded transition-all duration-300"
-          >
-            <FaBox /> Products
-          </Link>
-          <Link
-            href="/admin/customers"
-            className="flex items-center gap-2 hover:bg-indigo-700 p-2 rounded transition-all duration-300"
-          >
-            <FaUser /> Customers
-          </Link>
-          <Link
-            href="/admin/orders"
-            className="flex items-center gap-2 hover:bg-indigo-700 p-2 rounded transition-all duration-300"
-          >
-            <FaUser /> Orders
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 hover:bg-red-600 hover:text-white p-2 rounded text-red-500 mt-4 transition-all duration-300"
-          >
-            <FaSignOutAlt /> Logout
-          </button>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 p-3 rounded-lg text-red-300 hover:bg-red-800 hover:text-white transition-all duration-300 group"
+            >
+              <FaSignOutAlt className="group-hover:rotate-180 transition-transform duration-500" />
+              <span className="font-medium">Logout</span>
+            </button>
+          </motion.div>
         </nav>
-      </aside>
+      </motion.aside>
 
-      {/* Overlay to Close Sidebar */}
-      {sidebarOpen && (
-        <div
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-black opacity-50 md:hidden"
-        ></div>
-      )}
+      {/* Overlay */}
+      <AnimatePresence>
+        {isMobile && sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 bg-black md:hidden z-10"
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
